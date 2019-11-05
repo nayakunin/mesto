@@ -7,6 +7,8 @@ const { PORT = 3000 } = process.env;
 
 const app = express();
 
+const userRoutes = require('./routes_users');
+const cardRoutes = require('./routes_cards');
 const routes = require('./routes');
 
 app.use(bodyParser.json());
@@ -27,6 +29,8 @@ app.use((req, res, next) => {
 
   next();
 });
+app.use('/', userRoutes);
+app.use('/', cardRoutes);
 app.use('/', routes);
 
 app.listen(PORT, () => { });
