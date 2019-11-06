@@ -1,3 +1,4 @@
+/* eslint-disable prefer-promise-reject-errors */
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -8,7 +9,13 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.getUserById = (req, res) => {
   User.find({ _id: req.params.id })
-    .then((result) => res.send({ data: result }))
+    // eslint-disable-next-line consistent-return
+    .then((result) => {
+      if (result.length === 0) {
+        return Promise.reject('user not found');
+      }
+      res.send({ data: result });
+    })
     .catch(() => res.status(404).send({ message: 'user not found' }));
 };
 
