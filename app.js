@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
 require('dotenv').config();
 
 const { PORT = 3000 } = process.env;
@@ -24,6 +25,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
   useUnifiedTopology: true,
 });
+
+app.use(helmet);
 
 app.use(express.static(path.join(__dirname, '/public')));
 app.post('/signin', login);
