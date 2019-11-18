@@ -14,9 +14,19 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCardById = (req, res) => {
-  const { cardId } = req.body;
-
-  Card.findByIdAndRemove(cardId)
-    .then((card) => res.send({ data: card }))
+  Card.find({ owner: req.user._id })
+    .then((result) => {
+      let notFound = true;
+      result.forEach((elem) => {
+        // eslint-disable-next-line eqeqeq
+        if (elem.owner == req.user._id) {
+          notFound = false;
+          Card.findByIdAndRemove(req.params.cardId)
+            .then((card) => res.send({ data: card }))
+            .catch((err) => res.status(500).send({ message: err.message }));
+        }
+      });
+      if (notFound) res.send({ message: 'not permission' });
+    })
     .catch((err) => res.status(500).send({ message: err.message }));
 };

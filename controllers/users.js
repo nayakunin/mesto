@@ -28,7 +28,6 @@ module.exports.createUser = (req, res) => {
     email, password, name, about, avatar,
   } = req.body;
 
-  // add email validator
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       email,
