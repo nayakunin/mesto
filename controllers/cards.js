@@ -18,15 +18,13 @@ module.exports.deleteCardById = (req, res) => {
     .then((result) => {
       let notFound = true;
       result.forEach((elem) => {
-        // eslint-disable-next-line eqeqeq
-        if (elem.owner == req.user._id) {
+        if (elem.owner.toString() === req.user._id) {
           notFound = false;
           Card.findByIdAndRemove(req.params.cardId)
             .then((card) => res.send({ data: card }))
             .catch((err) => res.status(500).send({ message: err.message }));
         }
       });
-      if (notFound) res.send({ message: 'not permission' });
-    })
-    .catch((err) => res.status(500).send({ message: err.message }));
+      if (notFound) res.send({ message: 'no permission' });
+    });
 };

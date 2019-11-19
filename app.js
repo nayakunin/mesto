@@ -26,7 +26,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
-app.use(helmet);
+app.use(helmet());
 
 app.use(express.static(path.join(__dirname, '/public')));
 app.post('/signin', login);
