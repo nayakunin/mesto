@@ -2,14 +2,19 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
+require('dotenv').config();
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
 
-const userRoutes = require('./routes_users');
-const cardRoutes = require('./routes_cards');
+const userRoutes = require('./routes/users');
+const cardRoutes = require('./routes/cards');
 const routes = require('./routes');
+
+const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -21,16 +26,16 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
-app.use(express.static(path.join(__dirname, '/public')));
-app.use((req, res, next) => {
-  req.user = {
-    _id: '5db6019b7a7d4a2e40e69d75',
-  };
+app.use(helmet());
 
-  next();
-});
-app.use('/', userRoutes);
-app.use('/', cardRoutes);
+app.use(express.static(path.join(__dirname, '/public')));
+app.post('/signin', login);
+app.post('/signup', createUser);
+
+app.use(auth);
+
+app.use('/users', userRoutes);
+app.use('/cards', cardRoutes);
 app.use('/', routes);
 
 app.listen(PORT, () => { });
