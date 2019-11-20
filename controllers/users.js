@@ -3,27 +3,28 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+const NotFoundError = require('../errors/not-found-err');
+
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   User.find({ _id: req.params.id })
-    // eslint-disable-next-line consistent-return
-    .then((result) => {
-      if (result.length === 0) {
-        return Promise.reject('user not found');
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
       }
-      res.send({ data: result });
+      res.send({ data: user });
     })
-    .catch(() => res.status(404).send({ message: 'user not found' }));
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
@@ -37,10 +38,10 @@ module.exports.createUser = (req, res) => {
       avatar,
     }))
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentionals(email, password)
@@ -53,7 +54,5 @@ module.exports.login = (req, res) => {
       res.cookie('jwt', token, { httpOnly: true });
       res.status(201).send({ user, token });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch(next);
 };
